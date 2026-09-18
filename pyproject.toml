@@ -1,0 +1,24 @@
+[project]
+name = "online-store-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "dgamboa", email = "slamina.pf@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.0",
+    "asyncpg>=0.31.0",
+    "pydantic-settings>=2.15.0",
+    "python-dotenv>=1.2.3",
+    "sqlalchemy[asyncio]>=2.0.54",
+    "uuid-utils>=1.0.0",
+]
+
+[project.scripts]
+online-store-api = "online_store_api:main"
+
+[build-system]
+requires = ["uv_build>=0.12.16,<0.13.0"]
+build-backend = "uv_build"
