@@ -1,15 +1,16 @@
 # online-store-api
 
-Backend API for the online store (Shopify-like). This repo currently holds
-the database layer: SQLAlchemy models and Alembic migrations. FastAPI routes
-will be added in a later phase.
+Backend API for the online store (Shopify-like), built with FastAPI on top
+of a Postgres/SQLAlchemy data layer.
 
 ## Stack
 
 - Python 3.12+, managed with [uv](https://docs.astral.sh/uv/)
+- FastAPI + Uvicorn
 - SQLAlchemy 2.0 (async) + `asyncpg`
 - Alembic for migrations
-- Postgres (Supabase, Neon, or any Postgres 14+ instance)
+- Postgres (Supabase, Neon, or any Postgres 14+ instance; a local instance
+  can be run via the included `docker-compose.yml`)
 
 ## Setup
 
@@ -27,6 +28,32 @@ DATABASE_URL=postgresql+asyncpg://user:password@host:5432/online_store
 This works unchanged whether `host` is a local Postgres, a Supabase
 connection string, or a Neon connection string.
 
+### Local Postgres via Docker
+
+```bash
+docker compose up -d         # starts postgres:16 on localhost:5432
+uv run alembic upgrade head  # create the tables
+```
+
+## Running the API
+
+```bash
+uv run uvicorn online_store_api.main:app --reload
+```
+
+Interactive docs (Swagger UI) at `http://127.0.0.1:8000/docs`.
+
+## API
+
+Endpoints are organized into routers per resource, under
+`src/online_store_api/api/routers/`:
+
+- **`/products`** — products, plus nested variants/options/images (full CRUD)
+- **`/collections`** — collections, plus collection↔product membership (full CRUD)
+
+More modules (inventory, carts/orders, customers) will follow the same
+per-resource router pattern.
+
 ## Migrations
 
 ```bash
@@ -38,6 +65,17 @@ uv run alembic check               # verify models match the latest migration
 Models live under `src/online_store_api/models/`. Every model must be
 imported in `src/online_store_api/models/__init__.py` so Alembic's
 autogenerate can see it.
+
+## Tests
+
+```bash
+docker compose exec postgres psql -U postgres -c "CREATE DATABASE online_store_test"  # one-time
+uv run pytest
+```
+
+Tests run against a separate `online_store_test` database (same Postgres
+instance, different database) so they never touch dev data; all tables are
+truncated between tests for isolation.
 
 ## Schema overview
 
